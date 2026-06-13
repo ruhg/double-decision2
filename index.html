@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3f4f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Double Decision">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<title>Double Decision</title>
+<style>
+:root{--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--border:#d1d5db}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:var(--bg);color:var(--text);text-align:center;min-height:100vh;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
+h1{font-size:24px;margin:14px 0 6px}
+#stats{font-size:15px;margin:8px;color:var(--muted)}
+#wrap{max-width:520px;margin:0 auto}
+#game{position:relative;width:min(92vw,520px);height:min(92vw,520px);margin:10px auto;background:var(--card);border-radius:22px;border:1px solid var(--border);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+#fix{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:28px;color:#9ca3af;line-height:1}
+#center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:56px;line-height:1}
+.target{position:absolute;font-size:42px;transform:translate(-50%,-50%);line-height:1}
+.choice{font-size:34px;padding:14px 24px;margin:8px;border-radius:16px;border:1px solid var(--border);background:var(--card)}
+#msg{font-size:20px;min-height:54px;margin:12px auto;max-width:460px;line-height:1.3}
+#grid{display:none;grid-template-columns:repeat(5,1fr);gap:6px;width:min(92vw,520px);margin:10px auto}
+.cell{aspect-ratio:1;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:24px}
+button{font-size:20px;padding:12px 22px;border-radius:16px;border:1px solid var(--border);background:var(--card);cursor:pointer}
+button:active{transform:scale(.98)}
+#start{margin:8px 0 4px;font-weight:700}
+.small{font-size:13px;color:var(--muted);margin:8px auto;max-width:440px;line-height:1.35}
+</style>
+</head>
+<body>
+<div id="wrap">
+<h1>🚗 Double Decision</h1>
+<div id="stats">Poeng: 0 | Nivå: 1 | Tid: – | Visning: 1200 ms</div>
+<button id="start">Start</button>
+<div id="msg">Se på midten. Husk både biltype og hvor skiltet vises.</div>
+<div id="game">
+  <div id="fix">+</div>
+  <div id="center"></div>
+  <div id="sign" class="target"></div>
+</div>
+<div id="choices" style="display:none">
+  <button class="choice" onclick="answerCar('car')" aria-label="Personbil">🚗</button>
+  <button class="choice" onclick="answerCar('van')" aria-label="Varebil">🚐</button>
+</div>
+<div id="grid"></div>
+<div class="small">Tips: Når siden ligger på GitHub Pages kan du åpne den på iPhone og velge Del → Legg til på Hjem-skjerm.</div>
+</div>
+<script>
+const center=document.getElementById("center");
+const sign=document.getElementById("sign");
+const msg=document.getElementById("msg");
+const stats=document.getElementById("stats");
+const grid=document.getElementById("grid");
+const choices=document.getElementById("choices");
+const game=document.getElementById("game");
+let score=0, level=1, carType, signCell, startTime, carOK=false, showTime=1200;
+const positions=[
+ [10,10],[30,10],[50,10],[70,10],[90,10],
+ [10,30],[30,30],[70,30],[90,30],
+ [10,50],[30,50],[70,50],[90,50],
+ [10,70],[30,70],[70,70],[90,70],
+ [10,90],[30,90],[50,90],[70,90],[90,90]
+];
+function updateStats(rt="–"){
+ stats.textContent=`Poeng: ${score} | Nivå: ${level} | Tid: ${rt} | Visning: ${showTime} ms`;
+}
+function newRound(){
+ grid.style.display="none"; choices.style.display="none"; game.style.display="block";
+ carOK=false;
+ carType=Math.random()<0.5 ? "car" : "van";
+ signCell=Math.floor(Math.random()*positions.length);
+ center.textContent=carType==="car" ? "🚗" : "🚐";
+ sign.textContent=Math.random()<0.5 ? "🛑" : "⚠️";
+ const p=positions[signCell]; sign.style.left=p[0]+"%"; sign.style.top=p[1]+"%";
+ msg.textContent="Se nå!"; startTime=performance.now();
+ setTimeout(()=>{center.textContent=""; sign.textContent=""; choices.style.display="block"; msg.textContent="Hvilken bil så du i midten?";},showTime);
+}
+function answerCar(answer){ carOK = answer===carType; choices.style.display="none"; askLocation(); }
+function askLocation(){
+ game.style.display="none"; grid.style.display="grid"; grid.innerHTML=""; msg.textContent="Hvor var skiltet?";
+ for(let i=0;i<25;i++){ const b=document.createElement("button"); b.className="cell"; b.onclick=()=>answerLocation(i); grid.appendChild(b); }
+}
+function mapToGrid(posIndex){ const p=positions[posIndex]; const col=Math.min(4,Math.floor(p[0]/20)); const row=Math.min(4,Math.floor(p[1]/20)); return row*5+col; }
+function answerLocation(i){
+ const rt=Math.round(performance.now()-startTime); const correctCell=mapToGrid(signCell); const locOK=i===correctCell;
+ if(carOK && locOK){ score++; msg.textContent="Riktig på begge!"; if(score%3===0){ level++; showTime=Math.max(450,showTime-150); } }
+ else { msg.textContent=`Feil. Bil: ${carOK?"riktig":"feil"}, skilt: ${locOK?"riktig":"feil"}.`; showTime=Math.min(1600,showTime+80); }
+ updateStats(rt+" ms"); setTimeout(newRound,1400);
+}
+document.getElementById("start").onclick=()=>{ score=0; level=1; showTime=1200; updateStats(); newRound(); };
+updateStats();
+</script>
+</body>
+</html>
