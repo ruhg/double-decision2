@@ -1,420 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="no">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#1f7a8c" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#2f6f8f" />
   <link rel="manifest" href="manifest.json" />
   <title>Double Decision</title>
   <style>
-    :root{
-      --bg:#e9f3f5;
-      --panel:#ffffffee;
-      --ink:#102027;
-      --muted:#607d8b;
-      --accent:#1f7a8c;
-      --good:#1b8f4d;
-      --bad:#c62828;
-      --road:#5f666d;
-      --sidewalk:#c9d1d6;
-      --building:#cdd7df;
-    }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--ink);
-      background:linear-gradient(#d9eef5,#f6fbfd);
-      text-align:center;
-      min-height:100svh;
-      overflow-x:hidden;
-    }
-    h1{font-size:25px;margin:12px 8px 6px}
-    button,select,input{font:inherit}
-    button{
-      border:1px solid #b7c5cc;
-      background:white;
-      border-radius:14px;
-      padding:11px 15px;
-      cursor:pointer;
-      box-shadow:0 2px 5px #0001;
-    }
-    button:active{transform:scale(.98)}
-    .primary{background:var(--accent);color:white;border-color:var(--accent);font-weight:700}
-    .screen{width:min(94vw,520px);margin:0 auto 12px}
-    #setup{
-      background:var(--panel);
-      border:1px solid #d4e0e5;
-      border-radius:22px;
-      padding:14px;
-      box-shadow:0 8px 24px #00000018;
-    }
-    .field{margin:12px 0;text-align:left}
-    .field label{display:block;font-weight:700;margin-bottom:6px}
-    .row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    select{width:100%;padding:12px;border-radius:12px;border:1px solid #b7c5cc;background:white}
-    .toggle{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#f4f8fa;border:1px solid #d4e0e5;border-radius:14px;padding:10px;margin:8px 0}
-    .small{font-size:13px;color:var(--muted);line-height:1.35}
-    #hud{
-      display:none;
-      grid-template-columns:repeat(3,1fr);
-      gap:6px;
-      margin:8px auto;
-      width:min(94vw,520px);
-      font-size:13px;
-    }
-    .stat{background:#ffffffd9;border:1px solid #d4e0e5;border-radius:12px;padding:7px 5px}
-    #message{min-height:48px;margin:8px auto;font-size:19px;font-weight:700;width:min(94vw,520px)}
-    #city{
-      position:relative;
-      width:min(94vw,520px);
-      height:min(94vw,520px);
-      max-height:70svh;
-      margin:8px auto;
-      overflow:hidden;
-      border-radius:24px;
-      border:1px solid #b7c5cc;
-      background:#bfe5f1;
-      box-shadow:0 10px 28px #00000022;
-      touch-action:manipulation;
-    }
-    .sky{position:absolute;inset:0 0 45% 0;background:linear-gradient(#a9dff0,#d9f3fb)}
-    .sun{position:absolute;right:9%;top:7%;width:42px;height:42px;border-radius:50%;background:#ffe082}
-    .building{position:absolute;bottom:46%;width:18%;background:var(--building);border:1px solid #aebcc4;border-radius:5px 5px 0 0}
-    .b1{left:2%;height:33%}.b2{left:22%;height:42%}.b3{left:60%;height:37%}.b4{left:80%;height:30%}
-    .window{width:16%;height:9%;background:#f8fdff;border-radius:2px;display:inline-block;margin:8% 5% 0}
-    .sidewalk{position:absolute;left:0;right:0;bottom:29%;height:18%;background:var(--sidewalk);border-top:2px solid #aebcc4;border-bottom:2px solid #aebcc4}
-    .road{position:absolute;left:0;right:0;bottom:0;height:31%;background:var(--road)}
-    .lane{position:absolute;left:50%;bottom:0;width:4%;height:31%;transform:translateX(-50%);background:repeating-linear-gradient(to bottom,#fff 0 22px,transparent 22px 42px);opacity:.75}
-    .park{position:absolute;left:0;right:0;bottom:25%;height:6%;background:#79b36a}
-    .obj{
-      position:absolute;
-      transform:translate(-50%,-50%);
-      user-select:none;
-      pointer-events:none;
-      filter:drop-shadow(0 2px 2px #0003);
-      z-index:5;
-    }
-    #centerCar{font-size:54px;left:50%;top:56%;z-index:8}
-    #targetSign{font-size:46px;z-index:9}
-    .distractor{font-size:30px;opacity:.95}
-    .marker{position:absolute;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%);z-index:12;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:22px}
-    .ok{background:var(--good)}.no{background:var(--bad)}
-    #choices{display:none;width:min(94vw,520px);margin:8px auto;grid-template-columns:repeat(2,1fr);gap:8px}
-    .choice{font-size:30px;min-height:64px}
-    #nextBtn{display:none;margin:8px auto}
-    #city.answering{cursor:crosshair}
-    @media (max-width:390px){#centerCar{font-size:48px}#targetSign{font-size:40px}.choice{font-size:26px}}
+    :root{--bg:#e9f3f6;--panel:#ffffffee;--ink:#15313b;--muted:#607680;--accent:#2f6f8f;--good:#2e8b57;--bad:#c0392b;--line:#d4e0e5}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);text-align:center;user-select:none}
+    .wrap{max-width:760px;margin:0 auto;padding:12px 12px 24px}.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 10px 28px #0001}.hidden{display:none!important}
+    h1{font-size:28px;margin:8px 0 4px}.lead{color:var(--muted);margin:4px 0 14px;line-height:1.35}.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center}.label{font-weight:700;margin-top:14px;margin-bottom:6px}.hint{font-size:14px;color:var(--muted);line-height:1.35}.chip,.btn{border:1px solid var(--line);background:white;border-radius:16px;padding:10px 12px;font-size:17px}.chip{min-width:82px}.chip.active{outline:3px solid #9bd4e3;background:#edfaff}.btn{background:var(--accent);color:white;border-color:var(--accent);font-weight:700;padding:12px 20px}.btn.secondary{background:white;color:var(--ink)}.big-icons{font-size:34px;letter-spacing:4px;margin:6px 0}.targetBox{font-size:46px;margin:5px auto;padding:10px;border-radius:18px;background:#f6fbfd;border:1px solid var(--line);display:inline-block;min-width:92px}
+    #hud{position:sticky;top:0;z-index:5;background:#ffffffee;border-bottom:1px solid var(--line);backdrop-filter:blur(8px);padding:8px 6px;font-size:14px}.hudline{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}.find{font-weight:800;color:var(--accent)}
+    #scene{position:relative;width:min(94vw,680px);height:min(70vh,560px);min-height:390px;margin:10px auto;border-radius:24px;overflow:hidden;border:1px solid #b9d1d9;background:linear-gradient(#a8d7ee 0 36%,#d8edf1 36% 45%,#7aa772 45% 54%,#60666d 54% 100%);box-shadow:0 12px 32px #0002}.city{position:absolute;inset:0}.bld{position:absolute;bottom:43%;width:15%;background:linear-gradient(#d9e5ea,#b9cbd4);border:1px solid #9eb4be;border-bottom:0;border-radius:8px 8px 0 0}.bld:after{content:"";position:absolute;inset:12px;background:repeating-linear-gradient(90deg,#fff8 0 8px,transparent 8px 18px),repeating-linear-gradient(0deg,transparent 0 14px,#fff8 14px 21px)}.road{position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(90deg,#4e565d,#6a7177,#4e565d)}.road:before{content:"";position:absolute;left:49%;top:0;bottom:0;border-left:8px dashed #f2e9a8;opacity:.8}.sidewalk{position:absolute;left:0;right:0;bottom:46%;height:8%;background:#c7c2b8;border-top:3px solid #aba59a;border-bottom:3px solid #8c8a83}.obj{position:absolute;transform:translate(-50%,-50%);font-size:36px;filter:drop-shadow(0 2px 2px #0003)}.car{font-size:56px;z-index:3}.sign{font-size:46px;z-index:4}.marker{position:absolute;transform:translate(-50%,-50%);font-size:42px;z-index:6}.clickLayer{position:absolute;inset:0;z-index:10}.pulse{animation:pulse .4s ease-in-out 2}@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.25)}}
+    #choices{margin:12px auto}.choice{font-size:36px;min-width:74px;margin:5px;padding:10px 14px;border-radius:18px;border:1px solid var(--line);background:#fff}.choice:active,.cell:active{transform:scale(.97)}
+    #msg{font-size:19px;min-height:50px;margin:8px auto;line-height:1.35}.ok{color:var(--good);font-weight:800}.bad{color:var(--bad);font-weight:800}.small{font-size:13px;color:var(--muted)}
+    @media(max-width:430px){#scene{height:62vh;min-height:360px}.obj{font-size:31px}.sign{font-size:42px}.car{font-size:52px}.choice{font-size:32px}.chip{font-size:15px;min-width:74px}}
   </style>
 </head>
 <body>
-  <h1>🚗 Double Decision</h1>
+<div id="setup" class="wrap">
+  <div class="card">
+    <h1>🚗 Double Decision</h1>
+    <p class="lead">Se på bilen i midten. Finn samtidig målskiltet i bymiljøet. Etterpå svarer du hvilken bil du så og hvor skiltet stod.</p>
 
-  <main id="setup" class="screen">
-    <div class="field">
-      <label for="mode">Spillertype</label>
-      <select id="mode">
-        <option value="child">Barnespill</option>
-        <option value="standard" selected>Standard</option>
-        <option value="expert">Ekspert</option>
-      </select>
+    <div class="label">Biler som kan komme</div>
+    <div id="carPreview" class="big-icons">🔴🚗 🔵🚗 🟢🚐 🟡🚐</div>
+
+    <div class="label">Velg målskilt</div>
+    <div class="row" id="targetSigns"></div>
+    <div>Du skal finne dette skiltet:</div>
+    <div id="targetPreview" class="targetBox">🛑</div>
+    <div class="hint">Andre skilt kan brukes som distraksjoner i standard og ekspert.</div>
+
+    <div class="label">Spillertype</div>
+    <div class="row" id="modeBtns">
+      <button class="chip active" data-mode="child">Barn</button>
+      <button class="chip" data-mode="standard">Standard</button>
+      <button class="chip" data-mode="expert">Ekspert</button>
     </div>
 
-    <div class="field">
-      <label for="exposure">Hvor lenge skal bil og skilt vises?</label>
-      <select id="exposure">
-        <option value="3000">3,0 sek</option>
-        <option value="2000">2,0 sek</option>
-        <option value="1500">1,5 sek</option>
-        <option value="1000" selected>1,0 sek</option>
-        <option value="750">0,75 sek</option>
-        <option value="500">0,50 sek</option>
-        <option value="250">0,25 sek</option>
-      </select>
-      <div class="small">For barn: start gjerne med 2 eller 3 sekunder.</div>
-    </div>
+    <div class="label">Hvor lenge skal bil og skilt vises?</div>
+    <div class="row" id="timeBtns"></div>
 
-    <div class="field">
-      <label for="speed">Hastighet</label>
-      <select id="speed">
-        <option value="5">5 m/s (18 km/t)</option>
-        <option value="10" selected>10 m/s (36 km/t)</option>
-        <option value="15">15 m/s (54 km/t)</option>
-        <option value="20">20 m/s (72 km/t)</option>
-        <option value="25">25 m/s (90 km/t)</option>
-      </select>
-    </div>
+    <div class="label">Hastighet</div>
+    <div class="row" id="speedBtns"></div>
 
-    <div class="field">
-      <label for="distractors">Distraktorer</label>
-      <select id="distractors">
-        <option value="4">Få (4)</option>
-        <option value="8" selected>Medium (8)</option>
-        <option value="16">Mange (16)</option>
-        <option value="24">Ekstrem (24)</option>
-      </select>
-    </div>
+    <div class="label">Distraktorer</div>
+    <div class="row" id="distBtns"></div>
 
-    <label class="toggle"><span>Vis fasit etter feil</span><input id="showAnswer" type="checkbox" checked></label>
-    <label class="toggle"><span>Vis responstid</span><input id="showTime" type="checkbox" checked></label>
-    <label class="toggle"><span>Spill lyd</span><input id="sound" type="checkbox"></label>
+    <div class="label">Hjelp</div>
+    <label class="chip"><input id="showAnswer" type="checkbox" checked> Vis fasit etter feil</label>
+    <label class="chip"><input id="soundOn" type="checkbox"> Spill lyd</label>
 
-    <button class="primary" id="startBtn">Start spill</button>
-  </main>
+    <p class="hint">Barnemodus har større objekter, færre valg og færre distraktorer. Ekspertmodus kan vise andre skilt som konkurrerende distraktorer.</p>
+    <button class="btn" id="startBtn">Start spillet</button>
+  </div>
+</div>
 
-  <section id="hud">
-    <div class="stat" id="scoreStat">Poeng: 0</div>
-    <div class="stat" id="levelStat">Nivå: 1</div>
-    <div class="stat" id="hitStat">Treff: 0%</div>
-    <div class="stat" id="roundStat">Runder: 0</div>
-    <div class="stat" id="speedStat">10 m/s</div>
-    <div class="stat" id="timeStat">Tid: –</div>
-  </section>
+<div id="gameWrap" class="hidden">
+  <div id="hud"><div class="hudline"><span id="scoreHud">Poeng: 0</span><span id="levelHud">Nivå: 1</span><span id="hitHud">Treff: –</span><span id="speedHud">10 m/s</span><span class="find" id="findHud">Finn: 🛑</span></div></div>
+  <div class="wrap">
+    <div id="msg">Trykk start.</div>
+    <div id="choices" class="hidden"></div>
+    <div id="scene"><div class="city" id="city"></div><div id="items"></div><div id="clickLayer" class="clickLayer hidden"></div></div>
+    <button class="btn secondary" id="stopBtn">Til startsiden</button>
+  </div>
+</div>
 
-  <div id="message">Velg innstillinger og start.</div>
-
-  <section id="city" aria-label="Bymiljø">
-    <div class="sky"></div><div class="sun"></div>
-    <div class="building b1"><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i></div>
-    <div class="building b2"><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i></div>
-    <div class="building b3"><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i></div>
-    <div class="building b4"><i class="window"></i><i class="window"></i><i class="window"></i></div>
-    <div class="park"></div><div class="sidewalk"></div><div class="road"></div><div class="lane"></div>
-    <div id="centerCar" class="obj"></div>
-    <div id="targetSign" class="obj"></div>
-  </section>
-
-  <section id="choices"></section>
-  <button id="nextBtn" class="primary">Neste runde</button>
-
-  <script>
-    const $ = id => document.getElementById(id);
-    const city = $('city');
-    const centerCar = $('centerCar');
-    const targetSign = $('targetSign');
-    const choices = $('choices');
-    const msg = $('message');
-
-    const carSets = {
-      child:['🚗','🚐'],
-      standard:['🔴🚗','🔵🚗','🟢🚐','🟡🚐'],
-      expert:['🔴🚗','🔵🚗','🟢🚐','🟡🚐','⚫🚗','⚪🚐','🟣🚗','🟠🚐']
-    };
-    const signSets = {
-      child:['🛑','⚠️'],
-      standard:['🛑','⚠️','🚸','🚫','⛔'],
-      expert:['🛑','⚠️','🚸','🚫','⛔','🔄','🚳','🚲']
-    };
-    const distractorIcons = ['🌳','💡','🚏','🪑','🗑️','📢','🏪','🚶','🌲','📮','🚌','🧱'];
-    const speedBonus = {5:1,10:1.2,15:1.5,20:2,25:3};
-
-    let cfg, state, round;
-
-    function resetState(){
-      state = {score:0, level:1, rounds:0, hits:0, streakGood:0, streakBad:0, totalRt:0};
-    }
-
-    function readConfig(){
-      cfg = {
-        mode:$('mode').value,
-        exposure:+$('exposure').value,
-        speed:+$('speed').value,
-        distractors:+$('distractors').value,
-        showAnswer:$('showAnswer').checked,
-        showTime:$('showTime').checked,
-        sound:$('sound').checked
-      };
-      if(cfg.mode === 'child'){
-        cfg.distractors = Math.min(cfg.distractors,8);
-        cfg.exposure = Math.max(cfg.exposure,1000);
-      }
-    }
-
-    function updateHud(rt){
-      $('scoreStat').textContent = 'Poeng: ' + state.score;
-      $('levelStat').textContent = 'Nivå: ' + state.level;
-      $('roundStat').textContent = 'Runder: ' + state.rounds;
-      $('speedStat').textContent = cfg.speed + ' m/s';
-      const hit = state.rounds ? Math.round((state.hits/state.rounds)*100) : 0;
-      $('hitStat').textContent = 'Treff: ' + hit + '%';
-      const avg = state.hits ? Math.round(state.totalRt/state.hits) : null;
-      $('timeStat').textContent = cfg.showTime ? ('Tid: ' + (rt ? rt+' ms' : (avg ? avg+' ms' : '–'))) : 'Tid: skjult';
-    }
-
-    function rand(min,max){return Math.random()*(max-min)+min}
-    function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
-    function clearDynamic(){
-      document.querySelectorAll('.distractor,.marker').forEach(e=>e.remove());
-      centerCar.textContent=''; targetSign.textContent='';
-      choices.innerHTML=''; choices.style.display='none';
-      $('nextBtn').style.display='none';
-      city.classList.remove('answering');
-    }
-
-    function signPosition(){
-      const maxOut = cfg.mode==='child' ? 24 : Math.min(44,24 + state.level*3);
-      const side = Math.floor(Math.random()*4);
-      let x,y;
-      if(side===0){x=rand(8,92);y=rand(8,Math.max(18,50-maxOut));}
-      if(side===1){x=rand(8,Math.max(18,50-maxOut));y=rand(14,82);}
-      if(side===2){x=rand(Math.min(82,50+maxOut),92);y=rand(14,82);}
-      if(side===3){x=rand(8,92);y=rand(Math.min(72,50+maxOut),86);}
-      return {x,y};
-    }
-
-    function addDistractors(){
-      const count = Math.min(32, cfg.distractors + Math.floor(state.level/2));
-      for(let i=0;i<count;i++){
-        const d=document.createElement('div');
-        d.className='obj distractor';
-        d.textContent=pick(distractorIcons);
-        let x=rand(6,94), y=rand(18,84);
-        if(Math.abs(x-50)<12 && Math.abs(y-56)<12){ x += x<50 ? -15 : 15; }
-        d.style.left=x+'%'; d.style.top=y+'%';
-        d.style.fontSize=rand(24,36)+'px';
-        city.appendChild(d);
-      }
-    }
-
-    function startRound(){
-      clearDynamic();
-      updateHud();
-      const cars = carSets[cfg.mode];
-      const signs = signSets[cfg.mode];
-      const pos = signPosition();
-      round = {
-        car: pick(cars),
-        sign: pick(signs),
-        x: pos.x,
-        y: pos.y,
-        started: performance.now(),
-        carOK:false
-      };
-      addDistractors();
-      centerCar.textContent=round.car;
-      targetSign.textContent=round.sign;
-      targetSign.style.left=round.x+'%';
-      targetSign.style.top=round.y+'%';
-      targetSign.style.fontSize=(cfg.mode==='child'?54:46)+'px';
-      msg.textContent='Se på bilen i midten og finn skiltet i utkanten.';
-
-      setTimeout(()=>{
-        centerCar.textContent=''; targetSign.textContent='';
-        askCar();
-      }, Math.max(180,cfg.exposure));
-    }
-
-    function askCar(){
-      msg.textContent='Hvilken bil så du?';
-      choices.innerHTML='';
-      carSets[cfg.mode].forEach(car=>{
-        const b=document.createElement('button');
-        b.className='choice'; b.textContent=car;
-        b.onclick=()=>{ round.carOK = car===round.car; askLocation(); };
-        choices.appendChild(b);
-      });
-      choices.style.display='grid';
-    }
-
-    function askLocation(){
-      choices.style.display='none';
-      msg.textContent='Hvor stod trafikkskiltet? Trykk på stedet i bybildet.';
-      city.classList.add('answering');
-    }
-
-    function cityPoint(ev){
-      const r = city.getBoundingClientRect();
-      const t = ev.touches ? ev.touches[0] : ev;
-      return {x:((t.clientX-r.left)/r.width)*100, y:((t.clientY-r.top)/r.height)*100};
-    }
-
-    function dist(a,b,c,d){return Math.hypot(a-c,b-d)}
-
-    function placeMarker(x,y,kind,text){
-      const m=document.createElement('div');
-      m.className='marker '+kind; m.textContent=text;
-      m.style.left=x+'%'; m.style.top=y+'%';
-      city.appendChild(m);
-    }
-
-    function beep(ok){
-      if(!cfg.sound) return;
-      try{
-        const ac = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ac.createOscillator();
-        const gain = ac.createGain();
-        osc.frequency.value = ok ? 720 : 180;
-        osc.connect(gain); gain.connect(ac.destination);
-        gain.gain.setValueAtTime(.05,ac.currentTime);
-        osc.start(); osc.stop(ac.currentTime+.09);
-      }catch(e){}
-    }
-
-    city.addEventListener('click', ev=>{
-      if(!city.classList.contains('answering')) return;
-      city.classList.remove('answering');
-      const p = cityPoint(ev);
-      const rt = Math.round(performance.now()-round.started);
-      const tolerance = cfg.mode==='child' ? 16 : Math.max(8,14-state.level*.35);
-      const locOK = dist(p.x,p.y,round.x,round.y) <= tolerance;
-      const both = round.carOK && locOK;
-      state.rounds++;
-      if(both){
-        const base = 300;
-        const points = Math.round(base * speedBonus[cfg.speed]);
-        state.score += points;
-        state.hits++; state.streakGood++; state.streakBad=0; state.totalRt += rt;
-        msg.textContent='Riktig på begge! +' + points + ' poeng';
-        beep(true);
-      } else {
-        state.streakBad++; state.streakGood=0;
-        msg.textContent='Bil: ' + (round.carOK?'riktig':'feil') + '. Skilt: ' + (locOK?'riktig':'feil') + '.';
-        beep(false);
-      }
-
-      if(cfg.showAnswer && !both){
-        placeMarker(p.x,p.y,'no','×');
-        placeMarker(round.x,round.y,'ok','✓');
-        targetSign.textContent=round.sign;
-        targetSign.style.left=round.x+'%'; targetSign.style.top=round.y+'%';
-      }
-
-      adaptDifficulty();
-      updateHud(rt);
-      $('nextBtn').style.display='inline-block';
-    });
-
-    function adaptDifficulty(){
-      if(state.streakGood>=3){
-        state.level++;
-        cfg.exposure = Math.max(cfg.mode==='expert'?250:cfg.mode==='child'?1000:500, cfg.exposure-100);
-        cfg.distractors = Math.min(cfg.mode==='expert'?24:cfg.mode==='child'?8:18, cfg.distractors+2);
-        state.streakGood=0;
-      }
-      if(state.streakBad>=3){
-        cfg.exposure = Math.min(3000, cfg.exposure+200);
-        cfg.distractors = Math.max(cfg.mode==='child'?2:4, cfg.distractors-2);
-        state.streakBad=0;
-      }
-    }
-
-    $('startBtn').onclick=()=>{
-      readConfig(); resetState();
-      $('setup').style.display='none';
-      $('hud').style.display='grid';
-      updateHud();
-      startRound();
-    };
-    $('nextBtn').onclick=startRound;
-
-    $('mode').addEventListener('change',()=>{
-      if($('mode').value==='child'){
-        $('exposure').value='2000'; $('distractors').value='4'; $('speed').value='5';
-      }
-      if($('mode').value==='expert'){
-        $('exposure').value='500'; $('distractors').value='16'; $('speed').value='20';
-      }
-    });
-  </script>
+<script>
+const cars=[{id:'redCar',emoji:'🔴🚗',kid:true},{id:'blueCar',emoji:'🔵🚗',kid:true},{id:'greenVan',emoji:'🟢🚐'},{id:'yellowVan',emoji:'🟡🚐'}];
+const signs=[{id:'stop',emoji:'🛑',name:'Stopp'},{id:'warn',emoji:'⚠️',name:'Fare'},{id:'school',emoji:'🚸',name:'Skole'},{id:'no',emoji:'🚫',name:'Forbud'}];
+const distractEmojis=['🌳','🪑','🚏','💡','🗑️','📢','🏢','🌲','🚶','🚌'];
+const times=[0.25,0.5,0.75,1,1.5,2,3];
+const speeds=[5,10,15,20,25];
+const distLevels=[{id:'few',label:'Få',n:4},{id:'medium',label:'Medium',n:8},{id:'many',label:'Mange',n:16},{id:'extreme',label:'Ekstrem',n:24}];
+let cfg={mode:'child',time:2,speed:10,dist:'few',target:'stop'};
+let state={score:0,level:1,rounds:0,hits:0,streak:0,missStreak:0,avgRt:0,phase:'setup',car:null,targetPos:null,carOK:false,start:0,showMs:2000,distN:4};
+const $=id=>document.getElementById(id);
+function btnGroup(el,selector,val,cb){el.querySelectorAll(selector).forEach(b=>{b.classList.toggle('active',b.dataset.value==val||b.dataset.mode==val||b.dataset.id==val);b.onclick=()=>{cb(b);};});}
+function initSetup(){
+  $('targetSigns').innerHTML=signs.map(s=>`<button class="chip ${s.id===cfg.target?'active':''}" data-id="${s.id}">${s.emoji}<br><span class="small">${s.name}</span></button>`).join('')+`<button class="chip" data-id="random">🎲<br><span class="small">Tilfeldig</span></button>`;
+  $('timeBtns').innerHTML=times.map(t=>`<button class="chip ${t===cfg.time?'active':''}" data-value="${t}">${String(t).replace('.',',')} s</button>`).join('');
+  $('speedBtns').innerHTML=speeds.map(s=>`<button class="chip ${s===cfg.speed?'active':''}" data-value="${s}">${s} m/s</button>`).join('');
+  $('distBtns').innerHTML=distLevels.map(d=>`<button class="chip ${d.id===cfg.dist?'active':''}" data-id="${d.id}">${d.label}<br><span class="small">${d.n}</span></button>`).join('');
+  $('modeBtns').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cfg.mode=b.dataset.mode; applyModeDefaults(); initSetup();});
+  $('modeBtns').querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b.dataset.mode===cfg.mode));
+  btnGroup($('targetSigns'),'.chip',cfg.target,b=>{cfg.target=b.dataset.id; if(cfg.target==='random'){const s=signs[Math.floor(Math.random()*signs.length)]; cfg.target=s.id;} $('targetPreview').textContent=getTarget().emoji; initSetup();});
+  btnGroup($('timeBtns'),'.chip',cfg.time,b=>{cfg.time=Number(b.dataset.value); initSetup();});
+  btnGroup($('speedBtns'),'.chip',cfg.speed,b=>{cfg.speed=Number(b.dataset.value); initSetup();});
+  btnGroup($('distBtns'),'.chip',cfg.dist,b=>{cfg.dist=b.dataset.id; initSetup();});
+  $('targetPreview').textContent=getTarget().emoji;
+}
+function applyModeDefaults(){ if(cfg.mode==='child'){cfg.time=2;cfg.dist='few';cfg.speed=5}else if(cfg.mode==='standard'){cfg.time=1;cfg.dist='medium';cfg.speed=10}else{cfg.time=.5;cfg.dist='many';cfg.speed=20} }
+function getTarget(){return signs.find(s=>s.id===cfg.target)||signs[0]}
+function city(){
+  $('city').innerHTML='<div class="road"></div><div class="sidewalk"></div>'+
+    [2,20,42,63,82].map((l,i)=>`<div class="bld" style="left:${l}%;height:${28+[20,34,25,39,30][i]}%;width:${12+[6,0,7,1,4][i]}%"></div>`).join('');
+}
+function rand(min,max){return min+Math.random()*(max-min)}
+function farPos(){
+  const bands=cfg.mode==='child'?[18,82]:cfg.mode==='standard'?[10,90]:[5,95];
+  const side=Math.floor(Math.random()*4); let x,y;
+  if(side===0){x=rand(bands[0],bands[1]);y=rand(14,30)}
+  if(side===1){x=rand(8,24);y=rand(22,80)}
+  if(side===2){x=rand(76,92);y=rand(22,80)}
+  if(side===3){x=rand(bands[0],bands[1]);y=rand(70,88)}
+  return {x,y};
+}
+function safeDist(p,q){return Math.hypot(p.x-q.x,p.y-q.y)>13}
+function addObj(emoji,cls,p){const d=document.createElement('div');d.className='obj '+(cls||'');d.textContent=emoji;d.style.left=p.x+'%';d.style.top=p.y+'%';$('items').appendChild(d);return d}
+function updateHud(){const hit=state.rounds?Math.round(state.hits/state.rounds*100)+' %':'–';$('scoreHud').textContent='Poeng: '+state.score;$('levelHud').textContent='Nivå: '+state.level;$('hitHud').textContent='Treff: '+hit;$('speedHud').textContent=cfg.speed+' m/s';$('findHud').textContent='Finn: '+getTarget().emoji}
+function start(){state={score:0,level:1,rounds:0,hits:0,streak:0,missStreak:0,avgRt:0,phase:'show',car:null,targetPos:null,carOK:false,start:0,showMs:cfg.time*1000,distN:distLevels.find(d=>d.id===cfg.dist).n};$('setup').classList.add('hidden');$('gameWrap').classList.remove('hidden');city();updateHud();round()}
+function round(){
+  state.phase='show';$('choices').classList.add('hidden');$('clickLayer').classList.add('hidden');$('items').innerHTML='';$('msg').textContent='Se på bilen i midten og finn '+getTarget().emoji;
+  const carPool=cfg.mode==='child'?cars.filter(c=>c.kid):cars;state.car=carPool[Math.floor(Math.random()*carPool.length)];
+  addObj(state.car.emoji,'car',{x:50,y:55}); state.targetPos=farPos(); addObj(getTarget().emoji,'sign pulse',state.targetPos);
+  let n=Math.min(30,Math.max(0,state.distN+state.level-1)); let placed=[state.targetPos,{x:50,y:55}];
+  for(let i=0;i<n;i++){let p,tries=0; do{p={x:rand(8,92),y:rand(14,88)};tries++}while(tries<30 && placed.some(q=>!safeDist(p,q))); placed.push(p); let e=distractEmojis[Math.floor(Math.random()*distractEmojis.length)];
+    if(cfg.mode!=='child' && Math.random()<0.18){const other=signs.filter(s=>s.id!==cfg.target); e=other[Math.floor(Math.random()*other.length)].emoji} addObj(e,'',p);
+  }
+  state.start=performance.now(); setTimeout(()=>{if(state.phase!=='show')return;$('items').innerHTML='';askCar();},state.showMs);
+}
+function askCar(){state.phase='car';$('msg').textContent='Hvilken bil så du?';const pool=cfg.mode==='child'?cars.filter(c=>c.kid):cars;$('choices').innerHTML=pool.map(c=>`<button class="choice" data-id="${c.id}">${c.emoji}</button>`).join('');$('choices').classList.remove('hidden');$('choices').querySelectorAll('button').forEach(b=>b.onclick=()=>{state.carOK=b.dataset.id===state.car.id;$('choices').classList.add('hidden');askPlace();});}
+function askPlace(){state.phase='place';$('msg').textContent='Hvor stod '+getTarget().emoji+'? Trykk på stedet i bymiljøet.';$('clickLayer').classList.remove('hidden');$('clickLayer').onclick=e=>{const r=$('scene').getBoundingClientRect();const x=(e.clientX-r.left)/r.width*100;const y=(e.clientY-r.top)/r.height*100;answerPlace({x,y});};}
+function answerPlace(p){if(state.phase!=='place')return;state.phase='feedback';$('clickLayer').classList.add('hidden');const rt=Math.round(performance.now()-state.start);const dist=Math.hypot(p.x-state.targetPos.x,p.y-state.targetPos.y);const tolerance=cfg.mode==='child'?18:cfg.mode==='standard'?13:10;const locOK=dist<=tolerance;const both=state.carOK&&locOK;state.rounds++; if(both)state.hits++;
+  const mult={5:1,10:1.2,15:1.5,20:2,25:3}[cfg.speed]||1; let pts=(state.carOK?100:0)+(locOK?100:0)+(both?100:0); state.score+=Math.round(pts*mult);
+  if(both){state.streak++;state.missStreak=0;$('msg').innerHTML=`<span class="ok">Riktig på begge!</span> +${Math.round(pts*mult)} poeng · ${rt} ms`; beep(660,80)} else {state.streak=0;state.missStreak++;$('msg').innerHTML=`<span class="bad">Feil.</span> Bil: ${state.carOK?'riktig':'feil'}, skilt: ${locOK?'riktig':'feil'} · ${rt} ms`; beep(180,120)}
+  adapt(); updateHud(); if($('showAnswer').checked && !both){showMarkers(p)} setTimeout(round, both?1050:1700);
+}
+function showMarkers(p){addObj('❌','marker',p);addObj('✅','marker',state.targetPos)}
+function adapt(){if(state.streak>0 && state.streak%3===0){state.level++;state.showMs=Math.max(cfg.mode==='expert'?250:cfg.mode==='standard'?500:1000,state.showMs-120);state.distN=Math.min(30,state.distN+2)} if(state.missStreak>0 && state.missStreak%3===0){state.showMs=Math.min(3000,state.showMs+180);state.distN=Math.max(2,state.distN-2)}}
+function beep(freq,dur){if(!$('soundOn').checked)return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.frequency.value=freq;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.05,ac.currentTime);o.start();setTimeout(()=>{o.stop();ac.close()},dur)}catch(e){}}
+$('startBtn').onclick=start;$('stopBtn').onclick=()=>{location.reload()};initSetup();city();
+</script>
 </body>
 </html>
