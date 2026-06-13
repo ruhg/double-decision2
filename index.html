@@ -1,97 +1,420 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f3f4f6">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Double Decision">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.json">
-<title>Double Decision</title>
-<style>
-:root{--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--border:#d1d5db}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:var(--bg);color:var(--text);text-align:center;min-height:100vh;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
-h1{font-size:24px;margin:14px 0 6px}
-#stats{font-size:15px;margin:8px;color:var(--muted)}
-#wrap{max-width:520px;margin:0 auto}
-#game{position:relative;width:min(92vw,520px);height:min(92vw,520px);margin:10px auto;background:var(--card);border-radius:22px;border:1px solid var(--border);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-#fix{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:28px;color:#9ca3af;line-height:1}
-#center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:56px;line-height:1}
-.target{position:absolute;font-size:42px;transform:translate(-50%,-50%);line-height:1}
-.choice{font-size:34px;padding:14px 24px;margin:8px;border-radius:16px;border:1px solid var(--border);background:var(--card)}
-#msg{font-size:20px;min-height:54px;margin:12px auto;max-width:460px;line-height:1.3}
-#grid{display:none;grid-template-columns:repeat(5,1fr);gap:6px;width:min(92vw,520px);margin:10px auto}
-.cell{aspect-ratio:1;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:24px}
-button{font-size:20px;padding:12px 22px;border-radius:16px;border:1px solid var(--border);background:var(--card);cursor:pointer}
-button:active{transform:scale(.98)}
-#start{margin:8px 0 4px;font-weight:700}
-.small{font-size:13px;color:var(--muted);margin:8px auto;max-width:440px;line-height:1.35}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f7a8c" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Double Decision</title>
+  <style>
+    :root{
+      --bg:#e9f3f5;
+      --panel:#ffffffee;
+      --ink:#102027;
+      --muted:#607d8b;
+      --accent:#1f7a8c;
+      --good:#1b8f4d;
+      --bad:#c62828;
+      --road:#5f666d;
+      --sidewalk:#c9d1d6;
+      --building:#cdd7df;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--ink);
+      background:linear-gradient(#d9eef5,#f6fbfd);
+      text-align:center;
+      min-height:100svh;
+      overflow-x:hidden;
+    }
+    h1{font-size:25px;margin:12px 8px 6px}
+    button,select,input{font:inherit}
+    button{
+      border:1px solid #b7c5cc;
+      background:white;
+      border-radius:14px;
+      padding:11px 15px;
+      cursor:pointer;
+      box-shadow:0 2px 5px #0001;
+    }
+    button:active{transform:scale(.98)}
+    .primary{background:var(--accent);color:white;border-color:var(--accent);font-weight:700}
+    .screen{width:min(94vw,520px);margin:0 auto 12px}
+    #setup{
+      background:var(--panel);
+      border:1px solid #d4e0e5;
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 8px 24px #00000018;
+    }
+    .field{margin:12px 0;text-align:left}
+    .field label{display:block;font-weight:700;margin-bottom:6px}
+    .row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    select{width:100%;padding:12px;border-radius:12px;border:1px solid #b7c5cc;background:white}
+    .toggle{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#f4f8fa;border:1px solid #d4e0e5;border-radius:14px;padding:10px;margin:8px 0}
+    .small{font-size:13px;color:var(--muted);line-height:1.35}
+    #hud{
+      display:none;
+      grid-template-columns:repeat(3,1fr);
+      gap:6px;
+      margin:8px auto;
+      width:min(94vw,520px);
+      font-size:13px;
+    }
+    .stat{background:#ffffffd9;border:1px solid #d4e0e5;border-radius:12px;padding:7px 5px}
+    #message{min-height:48px;margin:8px auto;font-size:19px;font-weight:700;width:min(94vw,520px)}
+    #city{
+      position:relative;
+      width:min(94vw,520px);
+      height:min(94vw,520px);
+      max-height:70svh;
+      margin:8px auto;
+      overflow:hidden;
+      border-radius:24px;
+      border:1px solid #b7c5cc;
+      background:#bfe5f1;
+      box-shadow:0 10px 28px #00000022;
+      touch-action:manipulation;
+    }
+    .sky{position:absolute;inset:0 0 45% 0;background:linear-gradient(#a9dff0,#d9f3fb)}
+    .sun{position:absolute;right:9%;top:7%;width:42px;height:42px;border-radius:50%;background:#ffe082}
+    .building{position:absolute;bottom:46%;width:18%;background:var(--building);border:1px solid #aebcc4;border-radius:5px 5px 0 0}
+    .b1{left:2%;height:33%}.b2{left:22%;height:42%}.b3{left:60%;height:37%}.b4{left:80%;height:30%}
+    .window{width:16%;height:9%;background:#f8fdff;border-radius:2px;display:inline-block;margin:8% 5% 0}
+    .sidewalk{position:absolute;left:0;right:0;bottom:29%;height:18%;background:var(--sidewalk);border-top:2px solid #aebcc4;border-bottom:2px solid #aebcc4}
+    .road{position:absolute;left:0;right:0;bottom:0;height:31%;background:var(--road)}
+    .lane{position:absolute;left:50%;bottom:0;width:4%;height:31%;transform:translateX(-50%);background:repeating-linear-gradient(to bottom,#fff 0 22px,transparent 22px 42px);opacity:.75}
+    .park{position:absolute;left:0;right:0;bottom:25%;height:6%;background:#79b36a}
+    .obj{
+      position:absolute;
+      transform:translate(-50%,-50%);
+      user-select:none;
+      pointer-events:none;
+      filter:drop-shadow(0 2px 2px #0003);
+      z-index:5;
+    }
+    #centerCar{font-size:54px;left:50%;top:56%;z-index:8}
+    #targetSign{font-size:46px;z-index:9}
+    .distractor{font-size:30px;opacity:.95}
+    .marker{position:absolute;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%);z-index:12;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:22px}
+    .ok{background:var(--good)}.no{background:var(--bad)}
+    #choices{display:none;width:min(94vw,520px);margin:8px auto;grid-template-columns:repeat(2,1fr);gap:8px}
+    .choice{font-size:30px;min-height:64px}
+    #nextBtn{display:none;margin:8px auto}
+    #city.answering{cursor:crosshair}
+    @media (max-width:390px){#centerCar{font-size:48px}#targetSign{font-size:40px}.choice{font-size:26px}}
+  </style>
 </head>
 <body>
-<div id="wrap">
-<h1>🚗 Double Decision</h1>
-<div id="stats">Poeng: 0 | Nivå: 1 | Tid: – | Visning: 1200 ms</div>
-<button id="start">Start</button>
-<div id="msg">Se på midten. Husk både biltype og hvor skiltet vises.</div>
-<div id="game">
-  <div id="fix">+</div>
-  <div id="center"></div>
-  <div id="sign" class="target"></div>
-</div>
-<div id="choices" style="display:none">
-  <button class="choice" onclick="answerCar('car')" aria-label="Personbil">🚗</button>
-  <button class="choice" onclick="answerCar('van')" aria-label="Varebil">🚐</button>
-</div>
-<div id="grid"></div>
-<div class="small">Tips: Når siden ligger på GitHub Pages kan du åpne den på iPhone og velge Del → Legg til på Hjem-skjerm.</div>
-</div>
-<script>
-const center=document.getElementById("center");
-const sign=document.getElementById("sign");
-const msg=document.getElementById("msg");
-const stats=document.getElementById("stats");
-const grid=document.getElementById("grid");
-const choices=document.getElementById("choices");
-const game=document.getElementById("game");
-let score=0, level=1, carType, signCell, startTime, carOK=false, showTime=1200;
-const positions=[
- [10,10],[30,10],[50,10],[70,10],[90,10],
- [10,30],[30,30],[70,30],[90,30],
- [10,50],[30,50],[70,50],[90,50],
- [10,70],[30,70],[70,70],[90,70],
- [10,90],[30,90],[50,90],[70,90],[90,90]
-];
-function updateStats(rt="–"){
- stats.textContent=`Poeng: ${score} | Nivå: ${level} | Tid: ${rt} | Visning: ${showTime} ms`;
-}
-function newRound(){
- grid.style.display="none"; choices.style.display="none"; game.style.display="block";
- carOK=false;
- carType=Math.random()<0.5 ? "car" : "van";
- signCell=Math.floor(Math.random()*positions.length);
- center.textContent=carType==="car" ? "🚗" : "🚐";
- sign.textContent=Math.random()<0.5 ? "🛑" : "⚠️";
- const p=positions[signCell]; sign.style.left=p[0]+"%"; sign.style.top=p[1]+"%";
- msg.textContent="Se nå!"; startTime=performance.now();
- setTimeout(()=>{center.textContent=""; sign.textContent=""; choices.style.display="block"; msg.textContent="Hvilken bil så du i midten?";},showTime);
-}
-function answerCar(answer){ carOK = answer===carType; choices.style.display="none"; askLocation(); }
-function askLocation(){
- game.style.display="none"; grid.style.display="grid"; grid.innerHTML=""; msg.textContent="Hvor var skiltet?";
- for(let i=0;i<25;i++){ const b=document.createElement("button"); b.className="cell"; b.onclick=()=>answerLocation(i); grid.appendChild(b); }
-}
-function mapToGrid(posIndex){ const p=positions[posIndex]; const col=Math.min(4,Math.floor(p[0]/20)); const row=Math.min(4,Math.floor(p[1]/20)); return row*5+col; }
-function answerLocation(i){
- const rt=Math.round(performance.now()-startTime); const correctCell=mapToGrid(signCell); const locOK=i===correctCell;
- if(carOK && locOK){ score++; msg.textContent="Riktig på begge!"; if(score%3===0){ level++; showTime=Math.max(450,showTime-150); } }
- else { msg.textContent=`Feil. Bil: ${carOK?"riktig":"feil"}, skilt: ${locOK?"riktig":"feil"}.`; showTime=Math.min(1600,showTime+80); }
- updateStats(rt+" ms"); setTimeout(newRound,1400);
-}
-document.getElementById("start").onclick=()=>{ score=0; level=1; showTime=1200; updateStats(); newRound(); };
-updateStats();
-</script>
+  <h1>🚗 Double Decision</h1>
+
+  <main id="setup" class="screen">
+    <div class="field">
+      <label for="mode">Spillertype</label>
+      <select id="mode">
+        <option value="child">Barnespill</option>
+        <option value="standard" selected>Standard</option>
+        <option value="expert">Ekspert</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="exposure">Hvor lenge skal bil og skilt vises?</label>
+      <select id="exposure">
+        <option value="3000">3,0 sek</option>
+        <option value="2000">2,0 sek</option>
+        <option value="1500">1,5 sek</option>
+        <option value="1000" selected>1,0 sek</option>
+        <option value="750">0,75 sek</option>
+        <option value="500">0,50 sek</option>
+        <option value="250">0,25 sek</option>
+      </select>
+      <div class="small">For barn: start gjerne med 2 eller 3 sekunder.</div>
+    </div>
+
+    <div class="field">
+      <label for="speed">Hastighet</label>
+      <select id="speed">
+        <option value="5">5 m/s (18 km/t)</option>
+        <option value="10" selected>10 m/s (36 km/t)</option>
+        <option value="15">15 m/s (54 km/t)</option>
+        <option value="20">20 m/s (72 km/t)</option>
+        <option value="25">25 m/s (90 km/t)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="distractors">Distraktorer</label>
+      <select id="distractors">
+        <option value="4">Få (4)</option>
+        <option value="8" selected>Medium (8)</option>
+        <option value="16">Mange (16)</option>
+        <option value="24">Ekstrem (24)</option>
+      </select>
+    </div>
+
+    <label class="toggle"><span>Vis fasit etter feil</span><input id="showAnswer" type="checkbox" checked></label>
+    <label class="toggle"><span>Vis responstid</span><input id="showTime" type="checkbox" checked></label>
+    <label class="toggle"><span>Spill lyd</span><input id="sound" type="checkbox"></label>
+
+    <button class="primary" id="startBtn">Start spill</button>
+  </main>
+
+  <section id="hud">
+    <div class="stat" id="scoreStat">Poeng: 0</div>
+    <div class="stat" id="levelStat">Nivå: 1</div>
+    <div class="stat" id="hitStat">Treff: 0%</div>
+    <div class="stat" id="roundStat">Runder: 0</div>
+    <div class="stat" id="speedStat">10 m/s</div>
+    <div class="stat" id="timeStat">Tid: –</div>
+  </section>
+
+  <div id="message">Velg innstillinger og start.</div>
+
+  <section id="city" aria-label="Bymiljø">
+    <div class="sky"></div><div class="sun"></div>
+    <div class="building b1"><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i></div>
+    <div class="building b2"><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i></div>
+    <div class="building b3"><i class="window"></i><i class="window"></i><i class="window"></i><i class="window"></i></div>
+    <div class="building b4"><i class="window"></i><i class="window"></i><i class="window"></i></div>
+    <div class="park"></div><div class="sidewalk"></div><div class="road"></div><div class="lane"></div>
+    <div id="centerCar" class="obj"></div>
+    <div id="targetSign" class="obj"></div>
+  </section>
+
+  <section id="choices"></section>
+  <button id="nextBtn" class="primary">Neste runde</button>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const city = $('city');
+    const centerCar = $('centerCar');
+    const targetSign = $('targetSign');
+    const choices = $('choices');
+    const msg = $('message');
+
+    const carSets = {
+      child:['🚗','🚐'],
+      standard:['🔴🚗','🔵🚗','🟢🚐','🟡🚐'],
+      expert:['🔴🚗','🔵🚗','🟢🚐','🟡🚐','⚫🚗','⚪🚐','🟣🚗','🟠🚐']
+    };
+    const signSets = {
+      child:['🛑','⚠️'],
+      standard:['🛑','⚠️','🚸','🚫','⛔'],
+      expert:['🛑','⚠️','🚸','🚫','⛔','🔄','🚳','🚲']
+    };
+    const distractorIcons = ['🌳','💡','🚏','🪑','🗑️','📢','🏪','🚶','🌲','📮','🚌','🧱'];
+    const speedBonus = {5:1,10:1.2,15:1.5,20:2,25:3};
+
+    let cfg, state, round;
+
+    function resetState(){
+      state = {score:0, level:1, rounds:0, hits:0, streakGood:0, streakBad:0, totalRt:0};
+    }
+
+    function readConfig(){
+      cfg = {
+        mode:$('mode').value,
+        exposure:+$('exposure').value,
+        speed:+$('speed').value,
+        distractors:+$('distractors').value,
+        showAnswer:$('showAnswer').checked,
+        showTime:$('showTime').checked,
+        sound:$('sound').checked
+      };
+      if(cfg.mode === 'child'){
+        cfg.distractors = Math.min(cfg.distractors,8);
+        cfg.exposure = Math.max(cfg.exposure,1000);
+      }
+    }
+
+    function updateHud(rt){
+      $('scoreStat').textContent = 'Poeng: ' + state.score;
+      $('levelStat').textContent = 'Nivå: ' + state.level;
+      $('roundStat').textContent = 'Runder: ' + state.rounds;
+      $('speedStat').textContent = cfg.speed + ' m/s';
+      const hit = state.rounds ? Math.round((state.hits/state.rounds)*100) : 0;
+      $('hitStat').textContent = 'Treff: ' + hit + '%';
+      const avg = state.hits ? Math.round(state.totalRt/state.hits) : null;
+      $('timeStat').textContent = cfg.showTime ? ('Tid: ' + (rt ? rt+' ms' : (avg ? avg+' ms' : '–'))) : 'Tid: skjult';
+    }
+
+    function rand(min,max){return Math.random()*(max-min)+min}
+    function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+    function clearDynamic(){
+      document.querySelectorAll('.distractor,.marker').forEach(e=>e.remove());
+      centerCar.textContent=''; targetSign.textContent='';
+      choices.innerHTML=''; choices.style.display='none';
+      $('nextBtn').style.display='none';
+      city.classList.remove('answering');
+    }
+
+    function signPosition(){
+      const maxOut = cfg.mode==='child' ? 24 : Math.min(44,24 + state.level*3);
+      const side = Math.floor(Math.random()*4);
+      let x,y;
+      if(side===0){x=rand(8,92);y=rand(8,Math.max(18,50-maxOut));}
+      if(side===1){x=rand(8,Math.max(18,50-maxOut));y=rand(14,82);}
+      if(side===2){x=rand(Math.min(82,50+maxOut),92);y=rand(14,82);}
+      if(side===3){x=rand(8,92);y=rand(Math.min(72,50+maxOut),86);}
+      return {x,y};
+    }
+
+    function addDistractors(){
+      const count = Math.min(32, cfg.distractors + Math.floor(state.level/2));
+      for(let i=0;i<count;i++){
+        const d=document.createElement('div');
+        d.className='obj distractor';
+        d.textContent=pick(distractorIcons);
+        let x=rand(6,94), y=rand(18,84);
+        if(Math.abs(x-50)<12 && Math.abs(y-56)<12){ x += x<50 ? -15 : 15; }
+        d.style.left=x+'%'; d.style.top=y+'%';
+        d.style.fontSize=rand(24,36)+'px';
+        city.appendChild(d);
+      }
+    }
+
+    function startRound(){
+      clearDynamic();
+      updateHud();
+      const cars = carSets[cfg.mode];
+      const signs = signSets[cfg.mode];
+      const pos = signPosition();
+      round = {
+        car: pick(cars),
+        sign: pick(signs),
+        x: pos.x,
+        y: pos.y,
+        started: performance.now(),
+        carOK:false
+      };
+      addDistractors();
+      centerCar.textContent=round.car;
+      targetSign.textContent=round.sign;
+      targetSign.style.left=round.x+'%';
+      targetSign.style.top=round.y+'%';
+      targetSign.style.fontSize=(cfg.mode==='child'?54:46)+'px';
+      msg.textContent='Se på bilen i midten og finn skiltet i utkanten.';
+
+      setTimeout(()=>{
+        centerCar.textContent=''; targetSign.textContent='';
+        askCar();
+      }, Math.max(180,cfg.exposure));
+    }
+
+    function askCar(){
+      msg.textContent='Hvilken bil så du?';
+      choices.innerHTML='';
+      carSets[cfg.mode].forEach(car=>{
+        const b=document.createElement('button');
+        b.className='choice'; b.textContent=car;
+        b.onclick=()=>{ round.carOK = car===round.car; askLocation(); };
+        choices.appendChild(b);
+      });
+      choices.style.display='grid';
+    }
+
+    function askLocation(){
+      choices.style.display='none';
+      msg.textContent='Hvor stod trafikkskiltet? Trykk på stedet i bybildet.';
+      city.classList.add('answering');
+    }
+
+    function cityPoint(ev){
+      const r = city.getBoundingClientRect();
+      const t = ev.touches ? ev.touches[0] : ev;
+      return {x:((t.clientX-r.left)/r.width)*100, y:((t.clientY-r.top)/r.height)*100};
+    }
+
+    function dist(a,b,c,d){return Math.hypot(a-c,b-d)}
+
+    function placeMarker(x,y,kind,text){
+      const m=document.createElement('div');
+      m.className='marker '+kind; m.textContent=text;
+      m.style.left=x+'%'; m.style.top=y+'%';
+      city.appendChild(m);
+    }
+
+    function beep(ok){
+      if(!cfg.sound) return;
+      try{
+        const ac = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.frequency.value = ok ? 720 : 180;
+        osc.connect(gain); gain.connect(ac.destination);
+        gain.gain.setValueAtTime(.05,ac.currentTime);
+        osc.start(); osc.stop(ac.currentTime+.09);
+      }catch(e){}
+    }
+
+    city.addEventListener('click', ev=>{
+      if(!city.classList.contains('answering')) return;
+      city.classList.remove('answering');
+      const p = cityPoint(ev);
+      const rt = Math.round(performance.now()-round.started);
+      const tolerance = cfg.mode==='child' ? 16 : Math.max(8,14-state.level*.35);
+      const locOK = dist(p.x,p.y,round.x,round.y) <= tolerance;
+      const both = round.carOK && locOK;
+      state.rounds++;
+      if(both){
+        const base = 300;
+        const points = Math.round(base * speedBonus[cfg.speed]);
+        state.score += points;
+        state.hits++; state.streakGood++; state.streakBad=0; state.totalRt += rt;
+        msg.textContent='Riktig på begge! +' + points + ' poeng';
+        beep(true);
+      } else {
+        state.streakBad++; state.streakGood=0;
+        msg.textContent='Bil: ' + (round.carOK?'riktig':'feil') + '. Skilt: ' + (locOK?'riktig':'feil') + '.';
+        beep(false);
+      }
+
+      if(cfg.showAnswer && !both){
+        placeMarker(p.x,p.y,'no','×');
+        placeMarker(round.x,round.y,'ok','✓');
+        targetSign.textContent=round.sign;
+        targetSign.style.left=round.x+'%'; targetSign.style.top=round.y+'%';
+      }
+
+      adaptDifficulty();
+      updateHud(rt);
+      $('nextBtn').style.display='inline-block';
+    });
+
+    function adaptDifficulty(){
+      if(state.streakGood>=3){
+        state.level++;
+        cfg.exposure = Math.max(cfg.mode==='expert'?250:cfg.mode==='child'?1000:500, cfg.exposure-100);
+        cfg.distractors = Math.min(cfg.mode==='expert'?24:cfg.mode==='child'?8:18, cfg.distractors+2);
+        state.streakGood=0;
+      }
+      if(state.streakBad>=3){
+        cfg.exposure = Math.min(3000, cfg.exposure+200);
+        cfg.distractors = Math.max(cfg.mode==='child'?2:4, cfg.distractors-2);
+        state.streakBad=0;
+      }
+    }
+
+    $('startBtn').onclick=()=>{
+      readConfig(); resetState();
+      $('setup').style.display='none';
+      $('hud').style.display='grid';
+      updateHud();
+      startRound();
+    };
+    $('nextBtn').onclick=startRound;
+
+    $('mode').addEventListener('change',()=>{
+      if($('mode').value==='child'){
+        $('exposure').value='2000'; $('distractors').value='4'; $('speed').value='5';
+      }
+      if($('mode').value==='expert'){
+        $('exposure').value='500'; $('distractors').value='16'; $('speed').value='20';
+      }
+    });
+  </script>
 </body>
 </html>
